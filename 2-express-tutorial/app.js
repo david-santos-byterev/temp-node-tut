@@ -1,8 +1,11 @@
 const express = require('express')
-
 const app = express()
 
 const { products, people } = require('./data')
+
+const logger = require('./logger')
+const authorize = require('./authorize')
+app.use([logger, authorize])
 
 app.get('/', (req, res) => {
     res.send('<h1>Home Page</h1><a href="/api/products">products</a>')
@@ -56,6 +59,6 @@ app.get('/api/v1/query', (req, res) => {
     res.status(200).json({ success: true, data: sortedProducts })
 })
 
-app.listen(5000, () => {
-    console.log('server is listening on port 5000...')
+app.listen(5001, () => {
+    console.log('server is listening on port 5001...')
 })
