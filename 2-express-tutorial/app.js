@@ -1,64 +1,24 @@
 const express = require('express')
 const app = express()
 
-const { products, people } = require('./data')
+const peopleRouter = require('./routes/people')
+const authRouter = require('./routes/auth')
 
-const logger = require('./logger')
-const authorize = require('./authorize')
-app.use([logger, authorize])
+// statuc assets
+app.use(express.static('./methods-public'))
 
-app.get('/', (req, res) => {
-    res.send('<h1>Home Page</h1><a href="/api/products">products</a>')
-})
+// parse form data
+app.use(express.urlencoded({ extended: false }))
 
-app.get('/api/products', (req, res) => {
-    const newProducts = products.map((product) => {
-        const { id, name, image } = product
+// parse json
+app.use(express.json())
 
-        return { id, name, image }
-    })
-    res.json(newProducts)
-})
+// routers
+app.use('api/people', peopleRouter)
+app.use('/login', authRouter)
 
-app.get('/api/products/:productId', (req, res) => {
-    const { productId } = req.params
-    const singleProduct = products.find((product) => product.id === Number(productId))
 
-    if (!singleProduct) {
-        return res.status(404).send('Product does not exist')
-    }
-    res.json(singleProduct)
-})
 
-app.get('/api/products/:productId/reviews/:review', (req, res) => {
-    console.log(req.params)
-    res.send('dummy')
-})
-
-app.get('/api/v1/query', (req, res) => {
-    console.log(req.query)
-    const { search, limit } = req.query
-
-    let sortedProducts = [...products]
-
-    if (search) {
-        sortedProducts = sortedProducts.filter((product) => {
-            return product.name.startsWith(search)
-        })
-    }
-
-    if (limit) {
-        sortedProducts = sortedProducts.slice(0, Number(limit))
-    }
-
-    if (sortedProducts.length < 1) {
-        // res.status(200).send('no products matched your search')
-        return res.status(200).json({ success: true, data: [] })
-    }
-
-    res.status(200).json({ success: true, data: sortedProducts })
-})
-
-app.listen(5001, () => {
-    console.log('server is listening on port 5001...')
+app.listen(5000, () => {
+    console.log('server is listening on port 5000...')
 })
